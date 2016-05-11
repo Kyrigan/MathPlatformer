@@ -1,0 +1,586 @@
+Elm.Main = Elm.Main || {};
+Elm.Main.make = function (_elm) {
+   "use strict";
+   _elm.Main = _elm.Main || {};
+   if (_elm.Main.values) return _elm.Main.values;
+   var _U = Elm.Native.Utils.make(_elm),
+   $Basics = Elm.Basics.make(_elm),
+   $Color = Elm.Color.make(_elm),
+   $Debug = Elm.Debug.make(_elm),
+   $Graphics$Collage = Elm.Graphics.Collage.make(_elm),
+   $Graphics$Element = Elm.Graphics.Element.make(_elm),
+   $Keyboard = Elm.Keyboard.make(_elm),
+   $List = Elm.List.make(_elm),
+   $Maybe = Elm.Maybe.make(_elm),
+   $Result = Elm.Result.make(_elm),
+   $Signal = Elm.Signal.make(_elm),
+   $Text = Elm.Text.make(_elm),
+   $Time = Elm.Time.make(_elm),
+   $Touch = Elm.Touch.make(_elm),
+   $Window = Elm.Window.make(_elm);
+   var _op = {};
+   var quadTuple = F4(function (a,b,c,d) {
+      return {ctor: "_Tuple4",_0: a,_1: b,_2: c,_3: d};
+   });
+   var input = function () {
+      var delta = A2($Signal.map,
+      function (t) {
+         return t / 20;
+      },
+      $Time.fps(30));
+      return A2($Signal.sampleOn,
+      delta,
+      A5($Signal.map4,
+      quadTuple,
+      delta,
+      $Keyboard.arrows,
+      $Touch.touches,
+      $Window.dimensions));
+   }();
+   var plus = function (color) {
+      return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+                                             color,
+                                             A2($Graphics$Collage.rect,4,12))
+                                             ,A2($Graphics$Collage.filled,
+                                             color,
+                                             A2($Graphics$Collage.rect,12,4))]));
+   };
+   var heart = F2(function (color,size) {
+      return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.moveY,
+                                             size / 2,
+                                             A2($Graphics$Collage.filled,
+                                             color,
+                                             $Graphics$Collage.circle(size / 2)))
+                                             ,A2($Graphics$Collage.moveX,
+                                             size / 2,
+                                             A2($Graphics$Collage.filled,
+                                             color,
+                                             $Graphics$Collage.circle(size / 2)))
+                                             ,A2($Graphics$Collage.filled,
+                                             color,
+                                             $Graphics$Collage.square(size))]));
+   });
+   var scoreStyle = function (color) {
+      return {typeface: _U.list(["Arial"])
+             ,height: $Maybe.Just(24)
+             ,color: color
+             ,bold: true
+             ,italic: false
+             ,line: $Maybe.Nothing};
+   };
+   var victoryStyle = function (color) {
+      return {typeface: _U.list(["Arial"])
+             ,height: $Maybe.Just(60)
+             ,color: color
+             ,bold: true
+             ,italic: false
+             ,line: $Maybe.Nothing};
+   };
+   var opStyle = function (color) {
+      return {typeface: _U.list(["Arial"])
+             ,height: $Maybe.Just(16)
+             ,color: color
+             ,bold: true
+             ,italic: false
+             ,line: $Maybe.Nothing};
+   };
+   var operator = F2(function (op,z) {
+      var pos = _U.cmp(z,10) > -1 || _U.cmp(z,0) < 0 ? -8 : -6;
+      var _p0 = op;
+      switch (_p0.ctor)
+      {case "Add":
+         return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+                                                $Color.white,
+                                                A2($Graphics$Collage.rect,40,20))
+                                                ,A2($Graphics$Collage.moveX,pos,plus($Color.red))
+                                                ,A2($Graphics$Collage.move,
+                                                {ctor: "_Tuple2",_0: 8,_1: 2},
+                                                $Graphics$Collage.text(A2($Text.style,
+                                                opStyle($Color.red),
+                                                $Text.fromString($Basics.toString(z)))))]));
+         case "Sub":
+         return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+                                                $Color.white,
+                                                A2($Graphics$Collage.rect,40,20))
+                                                ,A2($Graphics$Collage.moveX,
+                                                pos,
+                                                A2($Graphics$Collage.filled,
+                                                $Color.blue,
+                                                A2($Graphics$Collage.rect,12,4)))
+                                                ,A2($Graphics$Collage.move,
+                                                {ctor: "_Tuple2",_0: 8,_1: 2},
+                                                $Graphics$Collage.text(A2($Text.style,
+                                                opStyle($Color.blue),
+                                                $Text.fromString($Basics.toString(z)))))]));
+         case "Mul":
+         return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+                                                $Color.white,
+                                                A2($Graphics$Collage.rect,40,20))
+                                                ,A2($Graphics$Collage.moveX,
+                                                pos,
+                                                A2($Graphics$Collage.rotate,
+                                                $Basics.degrees(45),
+                                                plus($Color.darkGreen)))
+                                                ,A2($Graphics$Collage.move,
+                                                {ctor: "_Tuple2",_0: 8,_1: 2},
+                                                $Graphics$Collage.text(A2($Text.style,
+                                                opStyle($Color.darkGreen),
+                                                $Text.fromString($Basics.toString(z)))))]));
+         case "Div":
+         return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+                                                $Color.white,
+                                                A2($Graphics$Collage.rect,40,20))
+                                                ,A2($Graphics$Collage.moveX,
+                                                pos,
+                                                A2($Graphics$Collage.filled,
+                                                $Color.purple,
+                                                A2($Graphics$Collage.rect,12,4)))
+                                                ,A2($Graphics$Collage.move,
+                                                {ctor: "_Tuple2",_0: pos,_1: 5},
+                                                A2($Graphics$Collage.filled,
+                                                $Color.purple,
+                                                $Graphics$Collage.circle(2)))
+                                                ,A2($Graphics$Collage.move,
+                                                {ctor: "_Tuple2",_0: pos,_1: -5},
+                                                A2($Graphics$Collage.filled,
+                                                $Color.purple,
+                                                $Graphics$Collage.circle(2)))
+                                                ,A2($Graphics$Collage.move,
+                                                {ctor: "_Tuple2",_0: 8,_1: 2},
+                                                $Graphics$Collage.text(A2($Text.style,
+                                                opStyle($Color.purple),
+                                                $Text.fromString($Basics.toString(z)))))]));
+         default:
+         return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+           $Color.darkGrey,
+           A2($Graphics$Collage.rect,40,20))]));}
+   });
+   var platform = F3(function (groundY,_p2,_p1) {
+      var _p3 = _p2;
+      var _p4 = _p1;
+      return A2($Graphics$Collage.move,
+      {ctor: "_Tuple2",_0: _p3._0._0,_1: _p3._0._1 + groundY},
+      $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+                                      $Color.darkGray,
+                                      A2($Graphics$Collage.rect,100,10))
+                                      ,A2($Graphics$Collage.moveY,-5,A2(operator,_p4._0,_p4._1))])));
+   });
+   var nearEnough = F2(function (_p6,_p5) {
+      var _p7 = _p6;
+      var _p10 = _p7._1;
+      var _p8 = _p5;
+      var _p9 = _p8._1;
+      return _U.cmp($Basics.abs(_p7._0 - _p8._0),
+      55) < 0 && (_U.cmp(_p9 - _p10,38) < 0 && _U.cmp(_p9 - _p10,
+      5) > 0);
+   });
+   var updateScore = F3(function (mario,_p12,_p11) {
+      var _p13 = _p12;
+      var _p14 = _p11;
+      var _p16 = _p14._1;
+      if (_U.eq(mario.oldvy,0) && (A2(nearEnough,
+      {ctor: "_Tuple2",_0: _p13._0._0,_1: _p13._0._1},
+      {ctor: "_Tuple2"
+      ,_0: mario.x
+      ,_1: mario.y}) && _U.eq(mario.operated,false))) {
+            var _p15 = _p14._0;
+            switch (_p15.ctor)
+            {case "Add": return mario.score + $Basics.toFloat(_p16);
+               case "Sub": return mario.score - $Basics.toFloat(_p16);
+               case "Mul": return mario.score * $Basics.toFloat(_p16);
+               case "Div": return mario.score / $Basics.toFloat(_p16);
+               default: return mario.score;}
+         } else return -9999;
+   });
+   var speedCalc = F2(function (mario,_p17) {
+      var _p18 = _p17;
+      return A2(nearEnough,
+      {ctor: "_Tuple2",_0: _p18._0._0,_1: _p18._0._1},
+      {ctor: "_Tuple2"
+      ,_0: mario.x
+      ,_1: mario.y}) && (_U.eq(mario.oldvy,0) || _U.eq(mario.vy,
+      0)) ? _p18._1 : -999;
+   });
+   var landOnAPlatform = F2(function (mario,_p19) {
+      var _p20 = _p19;
+      var _p21 = _p20._0._1;
+      return A2(nearEnough,
+      {ctor: "_Tuple2",_0: _p20._0._0,_1: _p21},
+      {ctor: "_Tuple2",_0: mario.x,_1: mario.y}) ? _p21 + 15 : 0;
+   });
+   var gravity = F2(function (dt,mario) {
+      var platforms = mario.platforms;
+      var groundHeight = $List.maximum(A2($List.map,
+      landOnAPlatform(mario),
+      platforms));
+      var platformSpeed = $List.maximum(A2($List.map,
+      speedCalc(mario),
+      platforms));
+      var change = $List.maximum(A3($List.map2,
+      updateScore(mario),
+      platforms,
+      mario.operations));
+      return _U.eq(change,$Maybe.Just(-9999)) ? _U.update(mario,
+      {vy: _U.cmp(mario.y,mario.groundHeight) > 0 || _U.cmp(mario.vy,
+      0) > 0 ? mario.vy - dt / 4 : 0
+      ,oldvy: mario.vy
+      ,platformSpeed: _U.eq(platformSpeed,
+      $Maybe.Just(-999)) ? 0 : A2($Maybe.withDefault,0,platformSpeed)
+      ,operated: _U.eq(mario.operated,true) && _U.cmp(mario.vy,
+      0) < 0 ? false : mario.operated
+      ,groundHeight: A2($Maybe.withDefault,
+      0,
+      groundHeight)}) : _U.update(mario,
+      {vy: _U.cmp(mario.y,mario.groundHeight) > 0 || _U.cmp(mario.vy,
+      0) > 0 ? mario.vy - dt / 4 : 0
+      ,oldvy: mario.vy
+      ,platformSpeed: _U.eq(platformSpeed,
+      $Maybe.Just(-999)) ? 0 : A2($Maybe.withDefault,0,platformSpeed)
+      ,operated: true
+      ,groundHeight: A2($Maybe.withDefault,0,groundHeight)
+      ,score: A2($Maybe.withDefault,0,change)});
+   });
+   var touchJump = F3(function (touch,mario,h$) {
+      var y = $Basics.toFloat(touch.y);
+      var h = $Basics.toFloat(h$);
+      return _U.eq(touch.id,69) ? false : _U.cmp(0 - y + h / 2,
+      mario.y + 60 - h / 2) > 0 ? true : false;
+   });
+   var updateTime = F2(function (dt,mario) {
+      return _U.update(mario,{t: mario.t + dt});
+   });
+   var Keys = F2(function (a,b) {    return {x: a,y: b};});
+   var Right = {ctor: "Right"};
+   var Left = {ctor: "Left"};
+   var Null = {ctor: "Null"};
+   var Div = {ctor: "Div"};
+   var Mul = {ctor: "Mul"};
+   var Sub = {ctor: "Sub"};
+   var Add = {ctor: "Add"};
+   var Model = function (a) {
+      return function (b) {
+         return function (c) {
+            return function (d) {
+               return function (e) {
+                  return function (f) {
+                     return function (g) {
+                        return function (h) {
+                           return function (i) {
+                              return function (j) {
+                                 return function (k) {
+                                    return function (l) {
+                                       return function (m) {
+                                          return function (n) {
+                                             return function (o) {
+                                                return function (p) {
+                                                   return {x: a
+                                                          ,y: b
+                                                          ,t: c
+                                                          ,groundHeight: d
+                                                          ,vx: e
+                                                          ,vy: f
+                                                          ,platformSpeed: g
+                                                          ,oldvy: h
+                                                          ,dir: i
+                                                          ,platforms: j
+                                                          ,score: k
+                                                          ,operations: l
+                                                          ,operated: m
+                                                          ,target: n
+                                                          ,win: o
+                                                          ,winPos: p};
+                                                };
+                                             };
+                                          };
+                                       };
+                                    };
+                                 };
+                              };
+                           };
+                        };
+                     };
+                  };
+               };
+            };
+         };
+      };
+   };
+   var width = 425;
+   var platformPhysics = F2(function (dt,_p22) {
+      var _p23 = _p22;
+      var _p26 = _p23._0._1;
+      var _p25 = _p23._0._0;
+      var _p24 = _p23._1;
+      return _U.cmp(_p25,width) > 0 ? {ctor: "_Tuple2"
+                                      ,_0: {ctor: "_Tuple2",_0: 0 - width,_1: _p26}
+                                      ,_1: _p24} : _U.cmp(_p25,0 - width) < 0 ? {ctor: "_Tuple2"
+                                                                                ,_0: {ctor: "_Tuple2",_0: width,_1: _p26}
+                                                                                ,_1: _p24} : {ctor: "_Tuple2"
+                                                                                             ,_0: {ctor: "_Tuple2",_0: _p25 + _p24 * dt,_1: _p26}
+                                                                                             ,_1: _p24};
+   });
+   var physics = F2(function (dt,mario) {
+      return _U.update(mario,
+      {x: _U.cmp(mario.x,
+      0 - (width - 50)) < 0 ? width - 50 : _U.cmp(mario.x,
+      width - 50) > 0 ? 0 - (width - 50) : mario.x + dt * (mario.vx + mario.platformSpeed)
+      ,y: A2($Basics.max,mario.groundHeight,mario.y + dt * mario.vy)
+      ,platforms: A2($List.map,platformPhysics(dt),mario.platforms)});
+   });
+   var startScore = 0;
+   var jumpPower = 6;
+   var jump = F4(function (keys,touches,h,mario) {
+      var touch = A2($Maybe.withDefault,
+      {x: 0,y: 0,id: 69,x0: 0,y0: 0,t0: 0},
+      $List.head(touches));
+      return (_U.cmp(keys.y,0) > 0 || A3(touchJump,
+      touch,
+      mario,
+      h)) && _U.eq(mario.vy,0) ? _U.update(mario,
+      {vy: jumpPower,oldvy: mario.vy}) : mario;
+   });
+   var horizontalVelocity = 3;
+   var touchMove = F3(function (touch,mario,w$) {
+      var x = $Basics.toFloat(touch.x);
+      var w = $Basics.toFloat(w$);
+      return _U.eq(touch.id,69) ? 0 : _U.cmp(x - w / 2,
+      mario.x + horizontalVelocity) > 0 ? 1 : _U.cmp(x - w / 2,
+      mario.x - horizontalVelocity) < 0 ? -1 : 0;
+   });
+   var walk = F4(function (keys,touches,w,mario) {
+      var touch = A2($Maybe.withDefault,
+      {x: 0,y: 0,id: 69,x0: 0,y0: 0,t0: 0},
+      $List.head(touches));
+      return _U.update(mario,
+      {vx: ($Basics.toFloat(keys.x) + A3(touchMove,
+      touch,
+      mario,
+      w)) * horizontalVelocity
+      ,dir: _U.cmp(keys.x,0) < 0 ? Left : _U.cmp(keys.x,
+      0) > 0 ? Right : mario.dir});
+   });
+   var operations = _U.list([{ctor: "_Tuple2",_0: Add,_1: 8}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 9}
+                            ,{ctor: "_Tuple2",_0: Mul,_1: 0}
+                            ,{ctor: "_Tuple2",_0: Mul,_1: -1}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 7}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 0}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 3}
+                            ,{ctor: "_Tuple2",_0: Mul,_1: 1}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 6}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 7}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 5}
+                            ,{ctor: "_Tuple2",_0: Div,_1: 2}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 4}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 8}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 1}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 10}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 3}
+                            ,{ctor: "_Tuple2",_0: Mul,_1: 2}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 10}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 2}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 2}]);
+   var platforms = _U.list([{ctor: "_Tuple2"
+                            ,_0: {ctor: "_Tuple2",_0: 280,_1: 60}
+                            ,_1: 1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 0,_1: 60},_1: 1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: -280,_1: 60},_1: 1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 280,_1: 120},_1: -1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 0,_1: 120},_1: -1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: -280,_1: 120},_1: -1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 280,_1: 180},_1: 1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 0,_1: 180},_1: 1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: -280,_1: 180},_1: 1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 280,_1: 240},_1: -1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 0,_1: 240},_1: -1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: -280,_1: 240},_1: -1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 280,_1: 300},_1: 1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 0,_1: 300},_1: 1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: -280,_1: 300},_1: 1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 280,_1: 360},_1: -1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 0,_1: 360},_1: -1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: -280,_1: 360},_1: -1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 280,_1: 420},_1: 1}
+                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 0,_1: 420},_1: 1}
+                           ,{ctor: "_Tuple2"
+                            ,_0: {ctor: "_Tuple2",_0: -280,_1: 420}
+                            ,_1: 1}]);
+   var bannerPosition = 0;
+   var winning = F2(function (dt,mario) {
+      return _U.eq(mario.win,false) && _U.eq(mario.score,
+      mario.target) ? _U.update(mario,
+      {win: true,winPos: mario.winPos - dt}) : _U.eq(mario.win,
+      true) && _U.cmp(mario.winPos,
+      -119 + bannerPosition) > 0 ? _U.update(mario,
+      {winPos: mario.winPos - dt}) : mario;
+   });
+   var update = F2(function (_p27,mario) {
+      var _p28 = _p27;
+      var _p31 = _p28._2;
+      var _p30 = _p28._1;
+      var _p29 = _p28._0;
+      return A2(winning,
+      _p29,
+      A2(physics,
+      _p29,
+      A4(walk,
+      _p30,
+      _p31,
+      _p28._3._0,
+      A4(jump,
+      _p30,
+      _p31,
+      _p28._3._1,
+      A2(updateTime,_p29,A2(gravity,_p29,mario))))));
+   });
+   var winBanner = F2(function (winPos,t) {
+      return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+                                             A3($Color.rgb,74,167,43),
+                                             A2($Graphics$Collage.rect,900,120))
+                                             ,A2($Graphics$Collage.moveX,
+                                             300,
+                                             A2($Graphics$Collage.scale,5,plus($Color.red)))
+                                             ,A2($Graphics$Collage.moveX,
+                                             -300,
+                                             A2($Graphics$Collage.filled,
+                                             $Color.blue,
+                                             A2($Graphics$Collage.rect,60,20)))
+                                             ,$Graphics$Collage.text(A2($Text.style,
+                                             victoryStyle($Color.white),
+                                             $Text.fromString("DAT MATH THO")))]));
+   });
+   var backdrop = F3(function (w,h,t) {
+      return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+      A3($Color.rgb,174,238,238),
+      A2($Graphics$Collage.rect,w,h))]));
+   });
+   var character = $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+   $Color.red,
+   $Graphics$Collage.circle(10))]));
+   var frameColor = A3($Color.rgb,74,167,43);
+   var view = F2(function (_p32,mario) {
+      var _p33 = _p32;
+      var _p36 = _p33._0;
+      var _p35 = _p33._1;
+      var _p34 = {ctor: "_Tuple2"
+                 ,_0: $Basics.toFloat(_p36)
+                 ,_1: $Basics.toFloat(_p35)};
+      var w = _p34._0;
+      var h = _p34._1;
+      var groundY = 60 - h / 2;
+      var position = {ctor: "_Tuple2"
+                     ,_0: mario.x
+                     ,_1: mario.y + groundY};
+      return A3($Graphics$Collage.collage,
+      _p36,
+      _p35,
+      A2($Basics._op["++"],
+      _U.list([A3(backdrop,w,h,mario.t)
+              ,A2($Graphics$Collage.move,
+              {ctor: "_Tuple2",_0: 0,_1: 24 - h / 2},
+              A2($Graphics$Collage.filled,
+              frameColor,
+              A2($Graphics$Collage.rect,w,50)))
+              ,A2($Graphics$Collage.move,position,character)]),
+      A2($Basics._op["++"],
+      A3($List.map2,
+      platform(groundY),
+      mario.platforms,
+      mario.operations),
+      _U.list([A2($Graphics$Collage.moveX,
+              (0 - w) / 2 - width + 50,
+              A2($Graphics$Collage.filled,
+              frameColor,
+              A2($Graphics$Collage.rect,w,h)))
+              ,A2($Graphics$Collage.moveX,
+              w / 2 + width - 50,
+              A2($Graphics$Collage.filled,
+              frameColor,
+              A2($Graphics$Collage.rect,w,h)))
+              ,A2($Graphics$Collage.move,
+              {ctor: "_Tuple2",_0: 0,_1: 28 - h / 2},
+              $Graphics$Collage.text($Text.concat(_U.list([A2($Text.style,
+                                                          scoreStyle($Color.white),
+                                                          $Text.fromString("Do the math! "))
+                                                          ,A2($Text.style,
+                                                          scoreStyle($Color.red),
+                                                          $Text.fromString($Basics.toString(mario.score)))
+                                                          ,A2($Text.style,
+                                                          scoreStyle($Color.white),
+                                                          $Text.fromString(A2($Basics._op["++"],
+                                                          " = ",
+                                                          $Basics.toString(mario.target))))]))))
+              ,A2($Graphics$Collage.move,
+              {ctor: "_Tuple2",_0: 0,_1: 60 + h / 2 + mario.winPos},
+              A2(winBanner,mario.winPos,mario.t))]))));
+   });
+   var targetScore = 38;
+   var mario = {x: 0
+               ,y: 0
+               ,t: 0
+               ,groundHeight: 0
+               ,vx: 0
+               ,vy: 0
+               ,platformSpeed: 0
+               ,oldvy: 0
+               ,dir: Right
+               ,platforms: platforms
+               ,score: startScore
+               ,operations: operations
+               ,operated: true
+               ,target: targetScore
+               ,win: false
+               ,winPos: 0};
+   var main = A3($Signal.map2,
+   view,
+   $Window.dimensions,
+   A3($Signal.foldp,update,mario,input));
+   return _elm.Main.values = {_op: _op
+                             ,targetScore: targetScore
+                             ,frameColor: frameColor
+                             ,character: character
+                             ,backdrop: backdrop
+                             ,winBanner: winBanner
+                             ,bannerPosition: bannerPosition
+                             ,platforms: platforms
+                             ,operations: operations
+                             ,horizontalVelocity: horizontalVelocity
+                             ,jumpPower: jumpPower
+                             ,startScore: startScore
+                             ,width: width
+                             ,Model: Model
+                             ,Add: Add
+                             ,Sub: Sub
+                             ,Mul: Mul
+                             ,Div: Div
+                             ,Null: Null
+                             ,Left: Left
+                             ,Right: Right
+                             ,Keys: Keys
+                             ,mario: mario
+                             ,update: update
+                             ,updateTime: updateTime
+                             ,winning: winning
+                             ,jump: jump
+                             ,touchJump: touchJump
+                             ,gravity: gravity
+                             ,landOnAPlatform: landOnAPlatform
+                             ,speedCalc: speedCalc
+                             ,updateScore: updateScore
+                             ,nearEnough: nearEnough
+                             ,physics: physics
+                             ,platformPhysics: platformPhysics
+                             ,walk: walk
+                             ,touchMove: touchMove
+                             ,view: view
+                             ,platform: platform
+                             ,operator: operator
+                             ,opStyle: opStyle
+                             ,victoryStyle: victoryStyle
+                             ,scoreStyle: scoreStyle
+                             ,heart: heart
+                             ,plus: plus
+                             ,main: main
+                             ,input: input
+                             ,quadTuple: quadTuple};
+};

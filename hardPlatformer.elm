@@ -1,3 +1,4 @@
+
 import Color exposing (..)
 import Graphics.Collage exposing (..)
 import Graphics.Element exposing (..)
@@ -5,10 +6,12 @@ import Keyboard
 import Time exposing (..)
 import Text exposing (..)
 import Window
+import Touch exposing (..)
+
 
 -- STUFF YOU GET TO CUSTOMIZE!
 
-targetScore = 38 -- Set your target score right here, the number next to this message!
+targetScore = 2222 -- Set your target score right here, the number next to this message!
 
 frameColor = rgb 74 167 43 -- Changes the color of the frame!
 
@@ -54,13 +57,13 @@ platforms = [ ((280,60),1),   ((0,60),1),   ((-280,60),1),
 -- 'Add' -> Addition, 'Sub' -> Subtraction, 
 -- 'Mul' -> Multiplication, 'Div' -> Subtraction
 
-operations = [ (Add,8),(Sub,9),(Mul,0),
-               (Mul,-1),(Sub,7),(Add,0),
-               (Add,3),(Mul,1),(Add,6),
-               (Sub,7),(Sub,5),(Div,2),
-               (Add,4),(Add,8),(Sub,1),
-               (Sub,10),(Sub,3),(Mul,2),
-               (Add,10),(Sub,2),(Add,2)]
+operations = [ (Add,101),(Sub,249),(Add,197),
+               (Sub,331),(Add,466),(Mul,0  ),
+               (Add,452),(Sub,931),(Add,325),
+               (Sub,791),(Mul,0  ),(Sub,220),
+               (Add,824),(Sub,123),(Mul,-1 ),
+               (Mul,0  ),(Add,321),(Sub,488),
+               (Add,623),(Sub,999),(Add,578)]
 
 -- VERY IMPORTANT, Look up and make sure the number of operations matches
 -- the number of platforms, or you just may run into a problem.
@@ -68,7 +71,7 @@ operations = [ (Add,8),(Sub,9),(Mul,0),
 horizontalVelocity = 3 -- How fast you can move side to side
 jumpPower = 6          -- How much leg day have you done?  
 startScore = 0         -- Maybe you don't want to start with 0?
-width = 800
+width = 425
 
 -- Beyond here is all the messy code we came up with! ENTER AT YOUR OWN RISK !! 
 
@@ -77,19 +80,26 @@ width = 800
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
+--
 
 
 
@@ -103,6 +113,7 @@ type alias Model =
   , groundHeight : Float
   , vx : Float
   , vy : Float
+  , platformSpeed : Float
   , oldvy : Float
   , dir : Direction
   , platforms : List ((Float,Float),Float)
@@ -131,6 +142,7 @@ mario =
   , groundHeight = 0
   , vx = 0
   , vy = 0
+  , platformSpeed = 0
   , oldvy = 0
   , dir = Right
   , platforms = platforms
@@ -145,15 +157,15 @@ mario =
 
 -- UPDATE
 
-update : (Float, Keys) -> Model -> Model
-update (dt, keys) mario =
+update : (Float, Keys, List Touch, (Int,Int)) -> Model -> Model
+update (dt, keys, touches, (w,h)) mario =
   mario
     |> gravity dt
     |> updateTime dt -- For animations!
-    |> jump keys
-    |> walk keys
+    |> jump keys touches h
+    |> walk keys touches w
     |> physics dt
-    |> winning dt -- Determines when the 
+    |> winning dt -- Determines when the
 
 updateTime dt mario = { mario | t = mario.t + dt }  
 
@@ -165,23 +177,40 @@ winning dt mario = if mario.win == False && mario.score == mario.target then
                              winPos = mario.winPos - dt }
                    else mario
 
-jump : Keys -> Model -> Model
-jump keys mario =
-  if keys.y > 0 && mario.vy == 0 then
+jump : Keys -> List Touch -> Int -> Model -> Model
+jump keys touches h mario =
+  let touch = Maybe.withDefault { x = 0
+                                , y = 0
+                                , id = 69
+                                , x0 = 0
+                                , y0 = 0
+                                , t0 = 0
+                                }
+              (List.head touches) -- Gets the top of the list.
+  in if (keys.y > 0 || touchJump touch mario h) && mario.vy == 0 then
       { mario | vy = jumpPower , oldvy = mario.vy}
+     else mario
 
-  else 
-      mario
+
+touchJump touch mario h' =
+  let h = toFloat h'
+      y = toFloat touch.y
+  in if touch.id == 69 then False
+     else if (-y + h/2) > (mario.y + 60 - h/2) then True
+     else False
+
 
 
 gravity : Float -> Model -> Model
 gravity dt mario = let platforms = mario.platforms
                        groundHeight = List.maximum (List.map (landOnAPlatform mario) platforms)
+                       platformSpeed = List.maximum (List.map (speedCalc mario) platforms)
                        change = List.maximum (List.map2 (updateScore mario) platforms mario.operations)
                    in if change == Just -9999 then
                             { mario |
                                 vy = if mario.y > mario.groundHeight || mario.vy > 0 then mario.vy - dt/4 else 0,
                                 oldvy = mario.vy,
+                                platformSpeed = if platformSpeed == Just -999 then 0 else Maybe.withDefault 0 platformSpeed,
                                 operated = if mario.operated == True && mario.vy < 0 then False else mario.operated,
                                  groundHeight = Maybe.withDefault 0 groundHeight
                             }
@@ -189,6 +218,7 @@ gravity dt mario = let platforms = mario.platforms
                       else  { mario |
                               vy = if mario.y > mario.groundHeight || mario.vy > 0 then mario.vy - dt/4 else 0,
                               oldvy = mario.vy,
+                              platformSpeed = if platformSpeed == Just -999 then 0 else Maybe.withDefault 0 platformSpeed,
                               operated = True,
                               groundHeight = Maybe.withDefault 0 groundHeight,
                               score = Maybe.withDefault 0 change
@@ -202,7 +232,14 @@ landOnAPlatform mario ((xPlat,yPlat),vxPlat)
       then yPlat + 15
 
       else 0
-      
+
+speedCalc mario ((xPlat,yPlat),vxPlat)
+  = if nearEnough (xPlat,yPlat) (mario.x,mario.y) && (mario.oldvy == 0 || mario.vy ==0)
+      then vxPlat
+
+      else -999
+
+
 updateScore mario ((xPlat,yPlat),vxPlat) (op,z)
   = if (mario.oldvy == 0 && nearEnough (xPlat,yPlat) (mario.x,mario.y) && mario.operated == False )
 
@@ -219,22 +256,30 @@ nearEnough (x1,y1) (x2,y2) = abs(x1-x2) < 55 && (y2-y1) < 38 && (y2-y1) > 5
 physics : Float -> Model -> Model
 physics dt mario =
   { mario |
-      x = if mario.x < -375 then 375
-          else if mario.x > 375 then -375 else
-          mario.x + dt * mario.vx,
+      x = if mario.x < -(width-50) then (width-50)
+          else if mario.x > (width-50) then -(width-50) else
+          mario.x + dt * (mario.vx+mario.platformSpeed),
       y = max mario.groundHeight (mario.y + dt * mario.vy)
       , platforms = List.map (platformPhysics dt) mario.platforms
   }
 
-platformPhysics dt ((x,y),vx) = if x > 425
-                                  then ((-425,y),vx)
-                                  else if x < -425 then ((425,y),vx)
+platformPhysics dt ((x,y),vx) = if x > width
+                                  then ((-width,y),vx)
+                                  else if x < -width then ((width,y),vx)
                                                    else ((x+vx*dt,y),vx)
 
-walk : Keys -> Model -> Model
-walk keys mario =
-  { mario |
-      vx = (toFloat keys.x) * horizontalVelocity,
+walk : Keys -> List Touch -> Int -> Model -> Model
+walk keys touches w mario = 
+  let touch = Maybe.withDefault { x = 0
+                                , y = 0
+                                , id = 69
+                                , x0 = 0
+                                , y0 = 0
+                                , t0 = 0
+                                }
+              (List.head touches) -- Gets the top of the list.
+  in { mario |
+      vx = (toFloat keys.x + (touchMove touch mario w))* horizontalVelocity,
       dir =
         if keys.x < 0 then
             Left
@@ -244,7 +289,17 @@ walk keys mario =
 
         else
             mario.dir
-  }
+      }
+
+
+touchMove touch mario w' =
+  let w = toFloat w'
+      x = toFloat touch.x
+  in if touch.id == 69 then 0 
+     else if (x-w/2) > (mario.x+horizontalVelocity) then 1
+     else if (x-w/2) < (mario.x-horizontalVelocity) then -1
+     else 0
+
 
 
 -- VIEW
@@ -273,11 +328,11 @@ view (w',h') mario =
       [
        rect w h
           |> filled frameColor
-          |> moveX (-w/2 - 375)
+          |> moveX (-w/2 - width + 50)
        ,
        rect w h
           |> filled frameColor
-          |> moveX (w/2 + 375)
+          |> moveX (w/2 + width - 50)
        , 
        text (Text.concat [Text.style (scoreStyle white) (fromString ("Do the math! ")),
                           Text.style (scoreStyle red) (fromString (toString mario.score)),
@@ -297,7 +352,7 @@ platform groundY ((x,y),vx) (op,z) = group [filled darkGray (rect 100 10)
                                             , operator op z |> moveY -5
                                              ] |> move (x,y+groundY)
 
-operator op z = let pos = if z >= 10 || z < 0 then -8 else -6
+operator op z = let pos = if z >= 10 then -6 - toFloat(floor(logBase 10 z)) * 2 else if z < 0 then -8 else -6
     
                 in case op of
                 Add -> group [ filled white (rect 40 20) ,
@@ -370,9 +425,11 @@ main =
   Signal.map2 view Window.dimensions (Signal.foldp update mario input)
 
 
-input : Signal (Float, Keys)
+input : Signal (Float, Keys, List Touch, (Int,Int))
 input =
   let
     delta = Signal.map (\t -> t/20) (fps 30)
   in
-    Signal.sampleOn delta (Signal.map2 (,) delta Keyboard.arrows)
+    Signal.sampleOn delta (Signal.map4 quadTuple delta Keyboard.arrows Touch.touches Window.dimensions)
+
+quadTuple a b c d = (a,b,c,d)
