@@ -7976,21 +7976,6 @@ Elm.Main.make = function (_elm) {
    var quadTuple = F4(function (a,b,c,d) {
       return {ctor: "_Tuple4",_0: a,_1: b,_2: c,_3: d};
    });
-   var input = function () {
-      var delta = A2($Signal.map,
-      function (t) {
-         return t / 20;
-      },
-      $Time.fps(30));
-      return A2($Signal.sampleOn,
-      delta,
-      A5($Signal.map4,
-      quadTuple,
-      delta,
-      $Keyboard.arrows,
-      $Touch.touches,
-      $Window.dimensions));
-   }();
    var plus = function (color) {
       return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
                                              color,
@@ -8038,6 +8023,14 @@ Elm.Main.make = function (_elm) {
              ,italic: false
              ,line: $Maybe.Nothing};
    };
+   var timerStyle = F2(function (color,size) {
+      return {typeface: _U.list(["Arial"])
+             ,height: $Maybe.Just(size)
+             ,color: color
+             ,bold: true
+             ,italic: false
+             ,line: $Maybe.Nothing};
+   });
    var operator = F2(function (op,z) {
       var pos = _U.cmp(z,10) > -1 || _U.cmp(z,0) < 0 ? -8 : -6;
       var _p0 = op;
@@ -8109,118 +8102,114 @@ Elm.Main.make = function (_elm) {
            $Color.darkGrey,
            A2($Graphics$Collage.rect,40,20))]));}
    });
-   var platform = F3(function (groundY,_p2,_p1) {
+   var nearEnough2 = F2(function (_p2,_p1) {
       var _p3 = _p2;
+      var _p6 = _p3._1;
       var _p4 = _p1;
-      return A2($Graphics$Collage.move,
-      {ctor: "_Tuple2",_0: _p3._0._0,_1: _p3._0._1 + groundY},
-      $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
-                                      $Color.darkGray,
-                                      A2($Graphics$Collage.rect,100,10))
-                                      ,A2($Graphics$Collage.moveY,-5,A2(operator,_p4._0,_p4._1))])));
+      var _p5 = _p4._1;
+      return _U.cmp($Basics.abs(_p3._0 - _p4._0),
+      55) < 0 && (_U.cmp(_p5 - _p6,100) < 0 && _U.cmp(_p5 - _p6,
+      -100) > 0);
    });
-   var timeConversion = function (score) {
-      var minute = A2($Basics._op["%"],$Basics.round(score),60);
-      var mintext = _U.cmp(minute,10) < 0 ? A2($Basics._op["++"],
-      "0",
-      $Basics.toString(minute)) : $Basics.toString(minute);
-      var hour = $Basics.round(score) / 60 | 0;
-      var hourtext = _U.cmp(hour,10) < 0 ? A2($Basics._op["++"],
-      "0",
-      $Basics.toString(hour)) : $Basics.toString(hour);
-      return $Text.fromString(A2($Basics._op["++"],
-      hourtext,
-      A2($Basics._op["++"],":",mintext)));
-   };
-   var nearEnough = F2(function (_p6,_p5) {
-      var _p7 = _p6;
-      var _p10 = _p7._1;
-      var _p8 = _p5;
-      var _p9 = _p8._1;
-      return _U.cmp($Basics.abs(_p7._0 - _p8._0),
-      55) < 0 && (_U.cmp(_p9 - _p10,38) < 0 && _U.cmp(_p9 - _p10,
+   var nearEnough = F2(function (_p8,_p7) {
+      var _p9 = _p8;
+      var _p12 = _p9._1;
+      var _p10 = _p7;
+      var _p11 = _p10._1;
+      return _U.cmp($Basics.abs(_p9._0 - _p10._0),
+      55) < 0 && (_U.cmp(_p11 - _p12,38) < 0 && _U.cmp(_p11 - _p12,
       5) > 0);
    });
-   var updateScore = F3(function (mario,_p12,_p11) {
-      var _p13 = _p12;
-      var _p14 = _p11;
-      var _p16 = _p14._1;
-      if (_U.eq(mario.oldvy,0) && (A2(nearEnough,
-      {ctor: "_Tuple2",_0: _p13._0._0,_1: _p13._0._1},
+   var updateScore = F3(function (state,_p14,_p13) {
+      var _p15 = _p14;
+      var _p16 = _p13;
+      var _p18 = _p16._1;
+      if (_U.eq(state.oldvy,0) && (A2(nearEnough,
+      {ctor: "_Tuple2",_0: _p15._0._0,_1: _p15._0._1},
       {ctor: "_Tuple2"
-      ,_0: mario.x
-      ,_1: mario.y}) && _U.eq(mario.operated,false))) {
-            var _p15 = _p14._0;
-            switch (_p15.ctor)
-            {case "Add": return _U.cmp(mario.score + $Basics.toFloat(_p16),
-                 12 * 60) < 0 ? mario.score + $Basics.toFloat(_p16) : mario.score + $Basics.toFloat(_p16) - 12 * 60;
-               case "Sub": return _U.cmp(mario.score - $Basics.toFloat(_p16),
-                 0) > -1 ? mario.score - $Basics.toFloat(_p16) : 12 * 60 + (mario.score - $Basics.toFloat(_p16));
-               case "Mul": return mario.score * $Basics.toFloat(_p16);
-               case "Div": return mario.score / $Basics.toFloat(_p16);
-               default: return mario.score;}
+      ,_0: state.x
+      ,_1: state.y}) && _U.eq(state.operated,false))) {
+            var _p17 = _p16._0;
+            switch (_p17.ctor)
+            {case "Add": return state.score + $Basics.toFloat(_p18);
+               case "Sub": return state.score - $Basics.toFloat(_p18);
+               case "Mul": return state.score * $Basics.toFloat(_p18);
+               case "Div": return state.score / $Basics.toFloat(_p18);
+               default: return state.score;}
          } else return -9999;
    });
-   var speedCalc = F2(function (mario,_p17) {
-      var _p18 = _p17;
-      return A2(nearEnough,
-      {ctor: "_Tuple2",_0: _p18._0._0,_1: _p18._0._1},
-      {ctor: "_Tuple2"
-      ,_0: mario.x
-      ,_1: mario.y}) && (_U.eq(mario.oldvy,0) || _U.eq(mario.vy,
-      0)) ? _p18._1 : -999;
-   });
-   var landOnAPlatform = F2(function (mario,_p19) {
+   var speedCalc = F2(function (state,_p19) {
       var _p20 = _p19;
-      var _p21 = _p20._0._1;
       return A2(nearEnough,
-      {ctor: "_Tuple2",_0: _p20._0._0,_1: _p21},
-      {ctor: "_Tuple2",_0: mario.x,_1: mario.y}) ? _p21 + 15 : 0;
+      {ctor: "_Tuple2",_0: _p20._0._0,_1: _p20._0._1},
+      {ctor: "_Tuple2"
+      ,_0: state.x
+      ,_1: state.y}) && (_U.eq(state.oldvy,0) || _U.eq(state.vy,
+      0)) ? _p20._1 : -999;
    });
-   var gravity = F2(function (dt,mario) {
-      var platforms = mario.platforms;
+   var landOnAPlatform = F2(function (state,_p21) {
+      var _p22 = _p21;
+      var _p23 = _p22._0._1;
+      return A2(nearEnough,
+      {ctor: "_Tuple2",_0: _p22._0._0,_1: _p23},
+      {ctor: "_Tuple2",_0: state.x,_1: state.y}) ? _p23 + 15 : 0;
+   });
+   var touchJump = F3(function (touch,state,h$) {
+      var y = $Basics.toFloat(touch.y);
+      var h = $Basics.toFloat(h$);
+      return _U.eq(touch.id,69) ? false : _U.cmp(0 - y + h / 2,
+      state.y + 60 - h / 2) > 0 ? true : false;
+   });
+   var updateTime = F2(function (dt,state) {
+      return _U.update(state,{t: state.t + dt});
+   });
+   var Keys = F2(function (a,b) {    return {x: a,y: b};});
+   var LeftRight = {ctor: "LeftRight"};
+   var getDirection = F2(function (state,_p24) {
+      var _p25 = _p24;
+      return A2(nearEnough,
+      {ctor: "_Tuple2",_0: _p25._0._0,_1: _p25._0._1},
+      {ctor: "_Tuple2",_0: state.x,_1: state.y}) ? _U.eq(_p25._2,
+      LeftRight) ? 2 : 1 : -999;
+   });
+   var gravity = F2(function (dt,state) {
+      var platforms = state.platforms;
       var groundHeight = $List.maximum(A2($List.map,
-      landOnAPlatform(mario),
+      landOnAPlatform(state),
       platforms));
       var platformSpeed = $List.maximum(A2($List.map,
-      speedCalc(mario),
+      speedCalc(state),
+      platforms));
+      var dir = $List.maximum(A2($List.map,
+      getDirection(state),
       platforms));
       var change = $List.maximum(A3($List.map2,
-      updateScore(mario),
+      updateScore(state),
       platforms,
-      mario.operations));
-      return _U.eq(change,$Maybe.Just(-9999)) ? _U.update(mario,
-      {vy: _U.cmp(mario.y,mario.groundHeight) > 0 || _U.cmp(mario.vy,
-      0) > 0 ? mario.vy - dt / 4 : 0
-      ,oldvy: mario.vy
+      state.operations));
+      return _U.eq(change,$Maybe.Just(-9999)) ? _U.update(state,
+      {vy: _U.cmp(state.y,state.groundHeight) > 0 || _U.cmp(state.vy,
+      0) > 0 ? state.vy - dt / 4 : 0
+      ,oldvy: state.vy
+      ,dir: A2($Maybe.withDefault,0,dir)
       ,platformSpeed: _U.eq(platformSpeed,
       $Maybe.Just(-999)) ? 0 : A2($Maybe.withDefault,0,platformSpeed)
-      ,operated: _U.eq(mario.operated,true) && _U.cmp(mario.vy,
-      0) < 0 ? false : mario.operated
+      ,operated: _U.eq(state.operated,true) && _U.cmp(state.vy,
+      0) < 0 ? false : state.operated
       ,groundHeight: A2($Maybe.withDefault,
       0,
-      groundHeight)}) : _U.update(mario,
-      {vy: _U.cmp(mario.y,mario.groundHeight) > 0 || _U.cmp(mario.vy,
-      0) > 0 ? mario.vy - dt / 4 : 0
-      ,oldvy: mario.vy
+      groundHeight)}) : _U.update(state,
+      {vy: _U.cmp(state.y,state.groundHeight) > 0 || _U.cmp(state.vy,
+      0) > 0 ? state.vy - dt / 4 : 0
+      ,oldvy: state.vy
+      ,dir: A2($Maybe.withDefault,0,dir)
       ,platformSpeed: _U.eq(platformSpeed,
       $Maybe.Just(-999)) ? 0 : A2($Maybe.withDefault,0,platformSpeed)
       ,operated: true
       ,groundHeight: A2($Maybe.withDefault,0,groundHeight)
       ,score: A2($Maybe.withDefault,0,change)});
    });
-   var touchJump = F3(function (touch,mario,h$) {
-      var y = $Basics.toFloat(touch.y);
-      var h = $Basics.toFloat(h$);
-      return _U.eq(touch.id,69) ? false : _U.cmp(0 - y + h / 2,
-      mario.y + 60 - h / 2) > 0 ? true : false;
-   });
-   var updateTime = F2(function (dt,mario) {
-      return _U.update(mario,{t: mario.t + dt});
-   });
-   var Keys = F2(function (a,b) {    return {x: a,y: b};});
-   var Right = {ctor: "Right"};
-   var Left = {ctor: "Left"};
+   var UpDown = {ctor: "UpDown"};
    var Null = {ctor: "Null"};
    var Div = {ctor: "Div"};
    var Mul = {ctor: "Mul"};
@@ -8242,22 +8231,34 @@ Elm.Main.make = function (_elm) {
                                           return function (n) {
                                              return function (o) {
                                                 return function (p) {
-                                                   return {x: a
-                                                          ,y: b
-                                                          ,t: c
-                                                          ,groundHeight: d
-                                                          ,vx: e
-                                                          ,vy: f
-                                                          ,platformSpeed: g
-                                                          ,oldvy: h
-                                                          ,dir: i
-                                                          ,platforms: j
-                                                          ,score: k
-                                                          ,operations: l
-                                                          ,operated: m
-                                                          ,target: n
-                                                          ,win: o
-                                                          ,winPos: p};
+                                                   return function (q) {
+                                                      return function (r) {
+                                                         return function (s) {
+                                                            return function (t) {
+                                                               return {x: a
+                                                                      ,y: b
+                                                                      ,t: c
+                                                                      ,groundHeight: d
+                                                                      ,vx: e
+                                                                      ,vy: f
+                                                                      ,dir: g
+                                                                      ,platformSpeed: h
+                                                                      ,platformDir: i
+                                                                      ,oldvy: j
+                                                                      ,platforms: k
+                                                                      ,score: l
+                                                                      ,operations: m
+                                                                      ,operated: n
+                                                                      ,target: o
+                                                                      ,win: p
+                                                                      ,lose: q
+                                                                      ,winPos: r
+                                                                      ,winTime: s
+                                                                      ,losePos: t};
+                                                            };
+                                                         };
+                                                      };
+                                                   };
                                                 };
                                              };
                                           };
@@ -8275,173 +8276,390 @@ Elm.Main.make = function (_elm) {
       };
    };
    var width = 425;
-   var platformPhysics = F2(function (dt,_p22) {
-      var _p23 = _p22;
-      var _p26 = _p23._0._1;
-      var _p25 = _p23._0._0;
-      var _p24 = _p23._1;
-      return _U.cmp(_p25,width) > 0 ? {ctor: "_Tuple2"
-                                      ,_0: {ctor: "_Tuple2",_0: 0 - width,_1: _p26}
-                                      ,_1: _p24} : _U.cmp(_p25,0 - width) < 0 ? {ctor: "_Tuple2"
-                                                                                ,_0: {ctor: "_Tuple2",_0: width,_1: _p26}
-                                                                                ,_1: _p24} : {ctor: "_Tuple2"
-                                                                                             ,_0: {ctor: "_Tuple2",_0: _p25 + _p24 * dt,_1: _p26}
-                                                                                             ,_1: _p24};
+   var platformPhysics = F3(function (dt,h,_p26) {
+      var _p27 = _p26;
+      var _p31 = _p27._0._1;
+      var _p30 = _p27._0._0;
+      var _p29 = _p27._1;
+      var _p28 = _p27._2;
+      var height = $Basics.toFloat(h);
+      return _U.eq(_p28,LeftRight) ? _U.cmp(_p30,
+      width) > 0 ? {ctor: "_Tuple3"
+                   ,_0: {ctor: "_Tuple2",_0: 0 - width,_1: _p31}
+                   ,_1: _p29
+                   ,_2: _p28} : _U.cmp(_p30,0 - width) < 0 ? {ctor: "_Tuple3"
+                                                             ,_0: {ctor: "_Tuple2",_0: width,_1: _p31}
+                                                             ,_1: _p29
+                                                             ,_2: _p28} : {ctor: "_Tuple3"
+                                                                          ,_0: {ctor: "_Tuple2",_0: _p30 + _p29 * dt,_1: _p31}
+                                                                          ,_1: _p29
+                                                                          ,_2: _p28} : _U.cmp(_p31,height) > 0 ? {ctor: "_Tuple3"
+                                                                                                                 ,_0: {ctor: "_Tuple2",_0: _p30,_1: -30}
+                                                                                                                 ,_1: _p29
+                                                                                                                 ,_2: _p28} : _U.cmp(_p31,
+      -30) < 0 ? {ctor: "_Tuple3"
+                 ,_0: {ctor: "_Tuple2",_0: _p30,_1: height}
+                 ,_1: _p29
+                 ,_2: _p28} : {ctor: "_Tuple3"
+                              ,_0: {ctor: "_Tuple2",_0: _p30,_1: _p31 + _p29 * dt}
+                              ,_1: _p29
+                              ,_2: _p28};
    });
-   var physics = F2(function (dt,mario) {
-      return _U.update(mario,
-      {x: _U.cmp(mario.x,
-      0 - (width - 50)) < 0 ? width - 50 : _U.cmp(mario.x,
-      width - 50) > 0 ? 0 - (width - 50) : mario.x + dt * (mario.vx + mario.platformSpeed)
-      ,y: A2($Basics.max,mario.groundHeight,mario.y + dt * mario.vy)
-      ,platforms: A2($List.map,platformPhysics(dt),mario.platforms)});
+   var physics = F3(function (dt,h,state) {
+      return _U.update(state,
+      {x: _U.cmp(state.x,
+      0 - (width - 50)) < 0 ? width - 50 : _U.cmp(state.x,
+      width - 50) > 0 ? 0 - (width - 50) : _U.eq(state.dir,
+      2) ? state.x + dt * (state.vx + state.platformSpeed) : state.x + dt * state.vx
+      ,y: _U.eq(state.dir,1) ? _U.cmp(state.platformSpeed,
+      0) < 0 ? A2($Basics.min,
+      state.groundHeight,
+      state.y + dt * state.vy) : A2($Basics.max,
+      state.groundHeight,
+      state.y + dt * state.vy) : A2($Basics.max,
+      state.groundHeight,
+      state.y + dt * state.vy)
+      ,platforms: A2($List.map,
+      A2(platformPhysics,dt,h),
+      state.platforms)});
    });
-   var startScore = 0;
    var jumpPower = 7;
-   var jump = F4(function (keys,touches,h,mario) {
+   var jump = F4(function (keys,touches,h,state) {
       var touch = A2($Maybe.withDefault,
       {x: 0,y: 0,id: 69,x0: 0,y0: 0,t0: 0},
       $List.head(touches));
       return (_U.cmp(keys.y,0) > 0 || A3(touchJump,
       touch,
-      mario,
-      h)) && _U.eq(mario.vy,0) ? _U.update(mario,
-      {vy: jumpPower,oldvy: mario.vy}) : mario;
+      state,
+      h)) && _U.eq(state.vy,0) ? _U.update(state,
+      {vy: jumpPower,oldvy: state.vy}) : state;
    });
    var horizontalVelocity = 4;
-   var touchMove = F3(function (touch,mario,w$) {
+   var touchMove = F3(function (touch,state,w$) {
       var x = $Basics.toFloat(touch.x);
       var w = $Basics.toFloat(w$);
       return _U.eq(touch.id,69) ? 0 : _U.cmp(x - w / 2,
-      mario.x + horizontalVelocity) > 0 ? 1 : _U.cmp(x - w / 2,
-      mario.x - horizontalVelocity) < 0 ? -1 : 0;
+      state.x + horizontalVelocity) > 0 ? 1 : _U.cmp(x - w / 2,
+      state.x - horizontalVelocity) < 0 ? -1 : 0;
    });
-   var walk = F4(function (keys,touches,w,mario) {
+   var walk = F4(function (keys,touches,w,state) {
       var touch = A2($Maybe.withDefault,
       {x: 0,y: 0,id: 69,x0: 0,y0: 0,t0: 0},
       $List.head(touches));
-      return _U.update(mario,
+      return _U.update(state,
       {vx: ($Basics.toFloat(keys.x) + A3(touchMove,
       touch,
-      mario,
-      w)) * horizontalVelocity
-      ,dir: _U.cmp(keys.x,0) < 0 ? Left : _U.cmp(keys.x,
-      0) > 0 ? Right : mario.dir});
+      state,
+      w)) * horizontalVelocity});
    });
-   var operations = _U.list([{ctor: "_Tuple2",_0: Add,_1: 70}
-                            ,{ctor: "_Tuple2",_0: Sub,_1: 50}
-                            ,{ctor: "_Tuple2",_0: Add,_1: 30}
-                            ,{ctor: "_Tuple2",_0: Add,_1: 60}
-                            ,{ctor: "_Tuple2",_0: Null,_1: 0}
-                            ,{ctor: "_Tuple2",_0: Null,_1: 0}
-                            ,{ctor: "_Tuple2",_0: Null,_1: 0}
-                            ,{ctor: "_Tuple2",_0: Add,_1: 70}]);
-   var platforms = _U.list([{ctor: "_Tuple2"
+   var operations = _U.list([{ctor: "_Tuple2",_0: Add,_1: 8}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 9}
+                            ,{ctor: "_Tuple2",_0: Mul,_1: 0}
+                            ,{ctor: "_Tuple2",_0: Mul,_1: -1}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 7}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 0}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 3}
+                            ,{ctor: "_Tuple2",_0: Mul,_1: 1}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 6}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 7}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 5}
+                            ,{ctor: "_Tuple2",_0: Div,_1: 2}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 4}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 8}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 1}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 10}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 3}
+                            ,{ctor: "_Tuple2",_0: Mul,_1: 2}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 10}
+                            ,{ctor: "_Tuple2",_0: Sub,_1: 2}
+                            ,{ctor: "_Tuple2",_0: Add,_1: 2}]);
+   var platforms = _U.list([{ctor: "_Tuple3"
                             ,_0: {ctor: "_Tuple2",_0: 200,_1: 60}
-                            ,_1: 1}
-                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 0,_1: 120},_1: 1}
-                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: -200,_1: 60},_1: 1}
-                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: -400,_1: 120},_1: 1}
-                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 200,_1: 180},_1: -1}
-                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: 0,_1: 240},_1: -1}
-                           ,{ctor: "_Tuple2",_0: {ctor: "_Tuple2",_0: -200,_1: 180},_1: -1}
-                           ,{ctor: "_Tuple2"
-                            ,_0: {ctor: "_Tuple2",_0: -400,_1: 240}
-                            ,_1: -1}]);
+                            ,_1: 1
+                            ,_2: UpDown}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: 200,_1: 270}
+                            ,_1: 1
+                            ,_2: UpDown}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: 200,_1: 480}
+                            ,_1: 1
+                            ,_2: UpDown}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: 280,_1: 360}
+                            ,_1: 1
+                            ,_2: LeftRight}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: 0,_1: 360}
+                            ,_1: 1
+                            ,_2: LeftRight}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: -280,_1: 360}
+                            ,_1: 1
+                            ,_2: LeftRight}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: 280,_1: 120}
+                            ,_1: 1
+                            ,_2: LeftRight}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: 0,_1: 120}
+                            ,_1: 1
+                            ,_2: LeftRight}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: -280,_1: 120}
+                            ,_1: 1
+                            ,_2: LeftRight}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: 280,_1: 240}
+                            ,_1: -1
+                            ,_2: LeftRight}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: 0,_1: 240}
+                            ,_1: -1
+                            ,_2: LeftRight}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: -280,_1: 240}
+                            ,_1: -1
+                            ,_2: LeftRight}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: -200,_1: 60}
+                            ,_1: -1
+                            ,_2: UpDown}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: -200,_1: 270}
+                            ,_1: -1
+                            ,_2: UpDown}
+                           ,{ctor: "_Tuple3"
+                            ,_0: {ctor: "_Tuple2",_0: -200,_1: 480}
+                            ,_1: -1
+                            ,_2: UpDown}]);
    var bannerPosition = 0;
-   var winning = F2(function (dt,mario) {
-      return _U.eq(mario.win,false) && _U.eq(mario.score,
-      mario.target) ? _U.update(mario,
-      {win: true,winPos: mario.winPos - dt}) : _U.eq(mario.win,
-      true) && _U.cmp(mario.winPos,
-      -119 + bannerPosition) > 0 ? _U.update(mario,
-      {winPos: mario.winPos - dt}) : mario;
+   var platformDesign = $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+   $Color.black,
+   A2($Graphics$Collage.rect,100,10))]));
+   var platform = F3(function (groundY,_p33,_p32) {
+      var _p34 = _p33;
+      var _p35 = _p32;
+      return A2($Graphics$Collage.move,
+      {ctor: "_Tuple2",_0: _p34._0._0,_1: _p34._0._1 + groundY},
+      $Graphics$Collage.group(_U.list([platformDesign
+                                      ,A2($Graphics$Collage.moveY,
+                                      -5,
+                                      A2(operator,_p35._0,_p35._1))])));
    });
-   var update = F2(function (_p27,mario) {
-      var _p28 = _p27;
-      var _p31 = _p28._2;
-      var _p30 = _p28._1;
-      var _p29 = _p28._0;
-      return A2(winning,
-      _p29,
-      A2(physics,
-      _p29,
-      A4(walk,
-      _p30,
-      _p31,
-      _p28._3._0,
-      A4(jump,
-      _p30,
-      _p31,
-      _p28._3._1,
-      A2(updateTime,_p29,A2(gravity,_p29,mario))))));
+   var getPoint = F2(function (size,n) {
+      return {ctor: "_Tuple2"
+             ,_0: size * $Basics.cos(n)
+             ,_1: size * $Basics.sin(n)};
    });
-   var winBanner = F2(function (winPos,t) {
-      return $Graphics$Collage.group(_U.list([$Graphics$Collage.text(A2($Text.style,
-      victoryStyle($Color.white),
-      $Text.fromString("DAT TIME THO")))]));
-   });
-   var backdrop = F3(function (w,h,t) {
-      return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
-      A3($Color.rgb,174,238,238),
-      A2($Graphics$Collage.rect,w,h))]));
-   });
-   var clock = function (target) {
-      var minute = A2($Basics._op["%"],$Basics.round(target),60);
-      var minuteangle = $Basics.degrees(90 - 6 * $Basics.toFloat(minute));
-      var hour = $Basics.round(target) / 60 | 0;
-      var hourangle = $Basics.degrees(90 - 30 * $Basics.toFloat(hour));
-      return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
-                                             $Color.white,
-                                             $Graphics$Collage.circle(100))
-                                             ,A2($Graphics$Collage.traced,
-                                             $Graphics$Collage.solid($Color.red),
-                                             A2($Graphics$Collage.segment,
-                                             {ctor: "_Tuple2",_0: 0,_1: 0},
-                                             $Basics.fromPolar({ctor: "_Tuple2",_0: 60,_1: hourangle})))
-                                             ,A2($Graphics$Collage.traced,
-                                             $Graphics$Collage.solid($Color.red),
-                                             A2($Graphics$Collage.segment,
-                                             {ctor: "_Tuple2",_0: 0,_1: 0},
-                                             $Basics.fromPolar({ctor: "_Tuple2"
-                                                               ,_0: 90
-                                                               ,_1: minuteangle})))]));
+   var gear = function (size) {
+      return $Graphics$Collage.polygon(A2($List.map,
+      getPoint(size),
+      _U.range(0,18)));
    };
+   var winBanner = F2(function (winPos,t) {
+      return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.rotate,
+                                             $Basics.degrees(0 - t),
+                                             A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: 200,_1: -10},
+                                             A2($Graphics$Collage.filled,$Color.black,gear(30))))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: 200,_1: -10},
+                                             A2($Graphics$Collage.filled,
+                                             A3($Color.rgb,100,100,100),
+                                             $Graphics$Collage.circle(15)))
+                                             ,A2($Graphics$Collage.rotate,
+                                             $Basics.degrees(t),
+                                             A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: -200,_1: -10},
+                                             A2($Graphics$Collage.filled,$Color.black,gear(30))))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: -200,_1: -10},
+                                             A2($Graphics$Collage.filled,
+                                             A3($Color.rgb,100,100,100),
+                                             $Graphics$Collage.circle(15)))
+                                             ,$Graphics$Collage.text(A2($Text.style,
+                                             victoryStyle($Color.white),
+                                             $Text.fromString("VICTORY")))]));
+   });
+   var loseBanner = F2(function (losePos,t) {
+      return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.rotate,
+                                             $Basics.degrees(0 - t),
+                                             A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: 200,_1: -10},
+                                             A2($Graphics$Collage.filled,$Color.black,gear(30))))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: 200,_1: -10},
+                                             A2($Graphics$Collage.filled,
+                                             A3($Color.rgb,100,100,100),
+                                             $Graphics$Collage.circle(15)))
+                                             ,A2($Graphics$Collage.rotate,
+                                             $Basics.degrees(t),
+                                             A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: -200,_1: -10},
+                                             A2($Graphics$Collage.filled,$Color.black,gear(30))))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: -200,_1: -10},
+                                             A2($Graphics$Collage.filled,
+                                             A3($Color.rgb,100,100,100),
+                                             $Graphics$Collage.circle(15)))
+                                             ,$Graphics$Collage.text(A2($Text.style,
+                                             victoryStyle($Color.white),
+                                             $Text.fromString("TRY AGAIN")))]));
+   });
    var character = $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
    $Color.red,
    $Graphics$Collage.circle(10))]));
-   var frameColor = A3($Color.rgb,74,167,43);
-   var view = F2(function (_p32,mario) {
-      var _p33 = _p32;
-      var _p36 = _p33._0;
-      var _p35 = _p33._1;
-      var _p34 = {ctor: "_Tuple2"
-                 ,_0: $Basics.toFloat(_p36)
-                 ,_1: $Basics.toFloat(_p35)};
-      var w = _p34._0;
-      var h = _p34._1;
+   var startingTime = 300;
+   var winning = F2(function (dt,state) {
+      return state.lose ? _U.update(state,
+      {win: false}) : _U.eq(state.win,false) && _U.eq(state.score,
+      state.target) ? _U.update(state,
+      {win: true
+      ,winPos: state.winPos - dt
+      ,winTime: startingTime - state.t / 50}) : _U.eq(state.win,
+      true) && _U.cmp(state.winPos,
+      -119 + bannerPosition) > 0 ? _U.update(state,
+      {winPos: state.winPos - dt}) : state;
+   });
+   var losing = F2(function (dt,state) {
+      return state.win ? _U.update(state,
+      {lose: false}) : _U.eq(state.lose,false) && _U.cmp(state.t,
+      50 * startingTime) > 0 ? _U.update(state,
+      {lose: true,losePos: state.losePos - dt}) : _U.eq(state.lose,
+      true) && _U.cmp(state.losePos,
+      -119 + bannerPosition) > 0 ? _U.update(state,
+      {losePos: state.losePos - dt}) : state;
+   });
+   var update = F2(function (_p36,state) {
+      var _p37 = _p36;
+      var _p41 = _p37._2;
+      var _p40 = _p37._1;
+      var _p39 = _p37._3._1;
+      var _p38 = _p37._0;
+      return A2(losing,
+      _p38,
+      A2(winning,
+      _p38,
+      A3(physics,
+      _p38,
+      _p39,
+      A4(walk,
+      _p40,
+      _p41,
+      _p37._3._0,
+      A4(jump,
+      _p40,
+      _p41,
+      _p39,
+      A2(updateTime,_p38,A2(gravity,_p38,state)))))));
+   });
+   var timerText = F5(function (t,color,size,win,winTime) {
+      return $Graphics$Collage.text(A2($Text.style,
+      A2(timerStyle,color,size),
+      $Text.fromString(A2($Basics._op["++"],
+      "Time: ",
+      $Basics.toString(win ? $Basics.ceiling(winTime) : _U.cmp($Basics.ceiling(startingTime - t / 50),
+      0) < 0 ? 0 : $Basics.ceiling(startingTime - t / 50))))));
+   });
+   var backdrop = F5(function (w,h,t,win,winTime) {
+      return $Graphics$Collage.group(_U.list([A2($Graphics$Collage.filled,
+                                             A3($Color.rgb,100,100,100),
+                                             A2($Graphics$Collage.rect,w,h))
+                                             ,A2($Graphics$Collage.rotate,
+                                             $Basics.degrees(t),
+                                             A2($Graphics$Collage.filled,$Color.darkGray,gear(100)))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: 100,_1: 100},
+                                             A2($Graphics$Collage.rotate,
+                                             $Basics.degrees(0 - t),
+                                             A2($Graphics$Collage.filled,$Color.darkGray,gear(40))))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: -100,_1: -100},
+                                             A2($Graphics$Collage.rotate,
+                                             $Basics.degrees(0 - t),
+                                             A2($Graphics$Collage.filled,$Color.darkGray,gear(40))))
+                                             ,A2($Graphics$Collage.filled,
+                                             A3($Color.rgb,100,100,100),
+                                             $Graphics$Collage.circle(50))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: 100,_1: 100},
+                                             A2($Graphics$Collage.filled,
+                                             A3($Color.rgb,100,100,100),
+                                             $Graphics$Collage.circle(20)))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: -100,_1: -100},
+                                             A2($Graphics$Collage.filled,
+                                             A3($Color.rgb,100,100,100),
+                                             $Graphics$Collage.circle(20)))
+                                             ,A2($Graphics$Collage.rotate,
+                                             $Basics.degrees((0 - t) / 2),
+                                             A2($Graphics$Collage.scale,5,plus($Color.darkGray)))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: 100,_1: 100},
+                                             A2($Graphics$Collage.rotate,
+                                             $Basics.degrees(t / 2),
+                                             A2($Graphics$Collage.filled,
+                                             $Color.darkGray,
+                                             A2($Graphics$Collage.rect,10,30))))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: -100,_1: -100},
+                                             A2($Graphics$Collage.rotate,
+                                             $Basics.degrees(t / 2),
+                                             A2($Graphics$Collage.filled,
+                                             $Color.darkGray,
+                                             A2($Graphics$Collage.rect,10,30))))
+                                             ,A2($Graphics$Collage.move,
+                                             {ctor: "_Tuple2",_0: -300,_1: 320},
+                                             A5(timerText,t,$Color.white,30,win,winTime))]));
+   });
+   var speedofGame = 20;
+   var input = function () {
+      var delta = A2($Signal.map,
+      function (t) {
+         return t / speedofGame;
+      },
+      $Time.fps(30));
+      return A2($Signal.sampleOn,
+      delta,
+      A5($Signal.map4,
+      quadTuple,
+      delta,
+      $Keyboard.arrows,
+      $Touch.touches,
+      $Window.dimensions));
+   }();
+   var frameColor = $Color.black;
+   var view = F2(function (_p42,state) {
+      var _p43 = _p42;
+      var _p46 = _p43._0;
+      var _p45 = _p43._1;
+      var _p44 = {ctor: "_Tuple2"
+                 ,_0: $Basics.toFloat(_p46)
+                 ,_1: $Basics.toFloat(_p45)};
+      var w = _p44._0;
+      var h = _p44._1;
       var groundY = 60 - h / 2;
       var position = {ctor: "_Tuple2"
-                     ,_0: mario.x
-                     ,_1: mario.y + groundY};
+                     ,_0: state.x
+                     ,_1: state.y + groundY};
       return A3($Graphics$Collage.collage,
-      _p36,
-      _p35,
+      _p46,
+      _p45,
       A2($Basics._op["++"],
-      _U.list([A3(backdrop,w,h,mario.t)
-              ,clock(mario.target)
-              ,A2($Graphics$Collage.move,
-              {ctor: "_Tuple2",_0: 0,_1: 24 - h / 2},
-              A2($Graphics$Collage.filled,
-              frameColor,
-              A2($Graphics$Collage.rect,w,50)))
+      _U.list([A5(backdrop,w,h,state.t,state.win,state.winTime)
               ,A2($Graphics$Collage.move,position,character)]),
       A2($Basics._op["++"],
       A3($List.map2,
       platform(groundY),
-      mario.platforms,
-      mario.operations),
-      _U.list([A2($Graphics$Collage.moveX,
+      state.platforms,
+      state.operations),
+      _U.list([A2($Graphics$Collage.move,
+              {ctor: "_Tuple2",_0: 0,_1: 24 - h / 2},
+              A2($Graphics$Collage.filled,
+              frameColor,
+              A2($Graphics$Collage.rect,w,50)))
+              ,A2($Graphics$Collage.moveX,
               (0 - w) / 2 - width + 50,
               A2($Graphics$Collage.filled,
               frameColor,
@@ -8455,52 +8673,66 @@ Elm.Main.make = function (_elm) {
               {ctor: "_Tuple2",_0: 0,_1: 28 - h / 2},
               $Graphics$Collage.text($Text.concat(_U.list([A2($Text.style,
                                                           scoreStyle($Color.white),
-                                                          $Text.fromString("The time is: "))
+                                                          $Text.fromString("Do the math! "))
                                                           ,A2($Text.style,
                                                           scoreStyle($Color.red),
-                                                          timeConversion(mario.score))]))))
+                                                          $Text.fromString(state.win ? $Basics.toString(state.target) : $Basics.toString(state.score)))
+                                                          ,A2($Text.style,
+                                                          scoreStyle($Color.white),
+                                                          $Text.fromString(A2($Basics._op["++"],
+                                                          " = ",
+                                                          $Basics.toString(state.target))))]))))
               ,A2($Graphics$Collage.move,
-              {ctor: "_Tuple2",_0: 0,_1: 60 + h / 2 + mario.winPos},
-              A2(winBanner,mario.winPos,mario.t))]))));
+              {ctor: "_Tuple2",_0: 0,_1: 60 + h / 2 + state.winPos},
+              A2(winBanner,state.winPos,state.t))
+              ,A2($Graphics$Collage.move,
+              {ctor: "_Tuple2",_0: 0,_1: 60 + h / 2 + state.losePos},
+              A2(loseBanner,state.losePos,state.t))]))));
    });
-   var minute = 10;
-   var hour = 11;
-   var targetScore = hour * 60 + minute;
-   var mario = {x: 0
+   var targetScore = 99;
+   var startScore = 0;
+   var state = {x: 0
                ,y: 0
                ,t: 0
                ,groundHeight: 0
                ,vx: 0
                ,vy: 0
+               ,dir: 0
                ,platformSpeed: 0
+               ,platformDir: UpDown
                ,oldvy: 0
-               ,dir: Right
                ,platforms: platforms
                ,score: startScore
                ,operations: operations
                ,operated: true
                ,target: targetScore
                ,win: false
-               ,winPos: 0};
+               ,lose: false
+               ,winPos: 0
+               ,winTime: startingTime
+               ,losePos: 0};
    var main = A3($Signal.map2,
    view,
    $Window.dimensions,
-   A3($Signal.foldp,update,mario,input));
+   A3($Signal.foldp,update,state,input));
    return _elm.Main.values = {_op: _op
-                             ,hour: hour
-                             ,minute: minute
+                             ,startScore: startScore
                              ,targetScore: targetScore
                              ,frameColor: frameColor
+                             ,speedofGame: speedofGame
+                             ,startingTime: startingTime
                              ,character: character
-                             ,clock: clock
                              ,backdrop: backdrop
+                             ,gear: gear
+                             ,getPoint: getPoint
                              ,winBanner: winBanner
+                             ,loseBanner: loseBanner
+                             ,platformDesign: platformDesign
                              ,bannerPosition: bannerPosition
                              ,platforms: platforms
                              ,operations: operations
                              ,horizontalVelocity: horizontalVelocity
                              ,jumpPower: jumpPower
-                             ,startScore: startScore
                              ,width: width
                              ,Model: Model
                              ,Add: Add
@@ -8508,28 +8740,32 @@ Elm.Main.make = function (_elm) {
                              ,Mul: Mul
                              ,Div: Div
                              ,Null: Null
-                             ,Left: Left
-                             ,Right: Right
+                             ,UpDown: UpDown
+                             ,LeftRight: LeftRight
                              ,Keys: Keys
-                             ,mario: mario
+                             ,state: state
                              ,update: update
                              ,updateTime: updateTime
                              ,winning: winning
+                             ,losing: losing
                              ,jump: jump
                              ,touchJump: touchJump
                              ,gravity: gravity
                              ,landOnAPlatform: landOnAPlatform
                              ,speedCalc: speedCalc
+                             ,getDirection: getDirection
                              ,updateScore: updateScore
                              ,nearEnough: nearEnough
+                             ,nearEnough2: nearEnough2
                              ,physics: physics
                              ,platformPhysics: platformPhysics
                              ,walk: walk
                              ,touchMove: touchMove
                              ,view: view
-                             ,timeConversion: timeConversion
                              ,platform: platform
                              ,operator: operator
+                             ,timerText: timerText
+                             ,timerStyle: timerStyle
                              ,opStyle: opStyle
                              ,victoryStyle: victoryStyle
                              ,scoreStyle: scoreStyle
